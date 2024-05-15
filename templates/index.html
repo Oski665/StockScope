@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockScope</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>StockScope</h1>
+        <form id="stockForm">
+            <input type="text" id="stockSymbol" placeholder="Symbol akcji" list="tickersList" required>
+            <datalist id="tickersList"></datalist>
+            <div class="date-selection">
+                <div class="date-picker">
+                    <input class="date-input" id="startDate" type="text" placeholder="YYYY-MM-DD" required>
+                    <span class="date-icon">&#x1F4C5;</span>
+                </div>
+                <div class="date-picker">
+                    <input class="date-input" id="endDate" type="text" placeholder="YYYY-MM-DD" required>
+                    <span class="date-icon">&#x1F4C5;</span>
+                </div>
+            </div>
+            <button type="submit">Pobierz dane</button>
+        </form>
+        <div id="result">
+            <canvas id="stockChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr(".date-input", { dateFormat: "Y-m-d" });
+
+        const stockSymbolInput = document.getElementById('stockSymbol');
+
+        stockSymbolInput.addEventListener('input', function() {
+            const query = this.value;
+            searchStocks(query);
+        });
+
+        function searchStocks(query) {
+            const url = `/search-stocks?query=${query}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.bestMatches) {
+                        updateTickerList(data.bestMatches);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateTickerList(matches) {
+            const tickersList = document.getElementById('tickersList');
+            tickersList.innerHTML = "";
+
+            matches.forEach(match => {
+                const option = document.createElement('option');
+                option.value = match['1. symbol'];
+                option.textContent = `${match['2. name']} (${match['1. symbol']})`;
+                tickersList.appendChild(option);
+            });
+        }
+
+        const stockForm = document.getElementById('stockForm');
+        stockForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const symbol = document.getElementById('stockSymbol').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (new Date(startDate) > new Date(endDate)) {
+                alert("Data 'do' nie może być wcześniejsza niż data 'od'.");
+                return;
+            }
+
+            const requestData = { symbol, startDate, endDate };
+            console.log("Wysłanie żądania:", requestData);
+
+            fetch('/pobierz-dane-akcji', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    displayResults(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Wystąpił błąd podczas pobierania danych.');
+            });
+        });
+
+        function displayResults(data) {
+            const ctx = document.getElementById('stockChart').getContext('2d');
+            const stockChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: data.datasets
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                tooltipFormat: 'YYYY-MM-DD'
+                            }
+                        },
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>

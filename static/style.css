@@ -1,0 +1,62 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+}
+
+.container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    font-size: 1.5em;
+    width: 70%; /* Znacząca szerokość strony */
+    padding: 20px; /* Większa wysokość */
+    margin: 10px 0; /* Marginesy dla oddechu */
+    border: 1px solid #ccc; /* Subtelna obramówka */
+    border-radius: 20px; /* Zaokrąglone rogi */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Lekki cień dla głębi */
+    -webkit-appearance: none; /* Usunięcie domyślnego stylu w niektórych przeglądarkach */
+    background-color: white; /* Tło */
+    cursor: pointer;
+}
+
+.date-picker {
+    position: relative;
+    display: inline-block;
+    margin-top: 20px;
+}
+.date-input {
+    width: 70%; /* Dostosuj szerokość zgodnie z potrzebami */
+    padding: 15px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: center;
+    font-size: 1.25em; /* Zwiększony rozmiar czcionki */
+}
+
+.date-icon {
+    margin-right: 20px;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
